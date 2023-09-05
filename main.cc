@@ -4,6 +4,7 @@
 #include "Widget.hpp"
 #include "Device.hpp"
 
+#include "nlohmann/json.hpp"
 #include <unistd.h>
 #include <math.h>
 #include <stdio.h>
@@ -15,6 +16,7 @@
 
 using rgb_matrix::RGBMatrix;
 using rgb_matrix::Canvas;
+using json = nlohmann::json;
 
 volatile bool interrupt_received = false;
 static void InterruptHandler(int signo) {
@@ -22,6 +24,7 @@ static void InterruptHandler(int signo) {
 }
 
 void drawImage(Canvas* c, sf::Image i);
+void readJson(std::string dir);
 void loadFrames(std::vector<sf::Image>& v, std::string dir, int frames);
 void setDefaults(RGBMatrix::Options& defaults);
 
@@ -38,13 +41,16 @@ int main(int argc, char** argv) {
     Background bg(vec);
     Canvas* canvas = RGBMatrix::CreateFromFlags(&argc, &argv, &defaults);
 
+    // Debug
+    std::ifstream f("settings.json");
+    json data = json::parse(f);
     // Device Setup
     Device d;
-
     // Time Widget Setup
     rgb_matrix::Color color(120, 20, 50);
-    TimeClock t(1, 14, color);
-    t.SetSize(SMALL);
+    TimeClock t;
+    t.InitializeWidgetFromJson(data,0);
+    
     d.AddWidget(&t);
     // Draw Loop
     if (canvas == NULL)
@@ -56,11 +62,7 @@ int main(int argc, char** argv) {
             canvas->Clear();
             return 0;
         }
-
-        // Draw Stuff
-        //drawImage(canvas, bg.step());
-
-        //t.Draw(canvas);
+        
         d.Display(canvas);
         
         // Frame Reset
@@ -101,4 +103,11 @@ void setDefaults(RGBMatrix::Options& defaults) {
     defaults.parallel = 1;
     defaults.show_refresh_rate = false;
 }
+
+void readJson(std::string dir) {
+    std::ifstream f("settings.json");
+    json data = json::parse(f);
+    std::cout << data["widget"]["id"] << std::endl;
+}
+
 

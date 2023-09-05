@@ -17,6 +17,10 @@ void Widget::Draw(rgb_matrix::Canvas* c) {
     std::cout << "draw" << std::endl;
 }
 
+void Widget::InitializeWidgetFromJson(json j, int index) {
+    std::cout << "initialize" << std::endl;
+}
+
 // TimeClock - Should probably not allow default font :3
 TimeClock::TimeClock() : Widget(0, 0) {
     _color = rgb_matrix::Color(255, 255, 255);
@@ -130,4 +134,14 @@ void TimeClock::Draw(rgb_matrix::Canvas* c) {
         _letterSpacing);
     rgb_matrix::DrawText(c, _dateFont, GetPosition().x + xOffset, GetPosition().y + yOffset, _color, nullptr, GetMonthDayYear().c_str(),
         _dateLetterSpacing);
+}
+
+void TimeClock::InitializeWidgetFromJson(json j, int index) {
+    SetPosition(j["widgets"][index]["position"]["x"], j["widgets"][index]["position"]["y"]);
+    _clockSize = j["widgets"][index]["size"];
+    int r = j["widgets"][index]["color"]["r"];
+    int g = j["widgets"][index]["color"]["g"];
+    int b = j["widgets"][index]["color"]["b"];
+    rgb_matrix::Color color(r, g, b);
+    _color = color;
 }
